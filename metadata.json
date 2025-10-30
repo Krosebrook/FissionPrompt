@@ -1,0 +1,8 @@
+{
+  "name": "FissionPrompt",
+  "description": "A comprehensive toolkit showcasing the power of Google's Gemini API, including advanced image and video generation, real-time conversation, media analysis, grounding, and more.",
+  "requestFramePermissions": [
+    "microphone",
+    "geolocation"
+  ]
+}

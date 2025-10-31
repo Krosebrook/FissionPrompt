@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { connectLive } from '../services/geminiService';
 import { encode, decode, decodeAudioData } from '../utils/helpers';
@@ -60,7 +59,7 @@ export const LiveConvo: React.FC = () => {
 
         try {
             if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                throw new Error("Your browser does not support audio recording.");
+                throw new Error("Your browser does not support the necessary audio features. Please try a modern browser like Chrome or Firefox.");
             }
 
             mediaStreamRef.current = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -125,7 +124,7 @@ export const LiveConvo: React.FC = () => {
                     }
                 },
                 onerror: (e: ErrorEvent) => {
-                    setError(`Session error: ${e.message}`);
+                    setError(`Connection error. Please check your internet connection and try again.`);
                     cleanup();
                 },
                 onclose: (e: CloseEvent) => {
@@ -137,7 +136,13 @@ export const LiveConvo: React.FC = () => {
             setIsSessionActive(true);
 
         } catch (err: any) {
-            setError(err.message || 'Failed to start conversation.');
+             if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+                setError('Microphone access denied. Please enable microphone permissions in your browser settings to continue.');
+            } else if (err.name === 'NotFoundError') {
+                setError('No microphone found. Please connect a microphone and try again.');
+            } else {
+                 setError(err.message || 'Failed to start conversation. Please ensure your microphone is connected and permissions are granted.');
+            }
             cleanup();
         }
     };
@@ -157,29 +162,29 @@ export const LiveConvo: React.FC = () => {
     return (
         <div className="max-w-4xl mx-auto p-4">
             <h2 className="text-3xl font-bold mb-6">Live Conversation</h2>
-            <div className="bg-gray-800 p-6 rounded-lg shadow-lg">
+            <div className="bg-fission-dark-secondary p-6 rounded-lg shadow-lg">
                 <div className="flex justify-center mb-6">
                     {!isSessionActive ? (
-                        <button onClick={startConversation} className="bg-gemini-blue hover:bg-gemini-dark-blue text-white font-bold py-3 px-8 rounded-full transition-colors text-lg">Start Talking</button>
+                        <button onClick={startConversation} className="bg-fission-cyan hover:bg-fission-pink text-fission-dark font-bold py-3 px-8 rounded-full transition-colors text-lg">Start Talking</button>
                     ) : (
                         <button onClick={stopConversation} className="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-full transition-colors text-lg">Stop Conversation</button>
                     )}
                 </div>
-                {error && <div className="text-center text-red-400 mb-4">{error}</div>}
+                {error && <div className="text-center text-red-400 bg-red-900/30 border border-red-500 p-3 rounded-md mb-4">{error}</div>}
                 
-                <div className="min-h-[300px] bg-gray-900 rounded-md p-4 space-y-4">
+                <div className="min-h-[300px] bg-fission-dark rounded-md p-4 space-y-4">
                     {conversationHistory.map((turn, index) => (
                         <div key={index}>
-                           <p className="text-gemini-blue font-semibold">You:</p>
+                           <p className="text-fission-cyan font-semibold">You:</p>
                            <p className="ml-4">{turn.user}</p>
-                           <p className="text-green-400 font-semibold mt-2">Model:</p>
+                           <p className="text-fission-pink font-semibold mt-2">Model:</p>
                            <p className="ml-4">{turn.model}</p>
                         </div>
                     ))}
-                     <div className="pt-4 border-t border-gray-700">
-                        <p className="text-gemini-blue font-semibold">You are saying:</p>
+                     <div className="pt-4 border-t border-fission-purple">
+                        <p className="text-fission-cyan font-semibold">You are saying:</p>
                         <p className="ml-4 italic text-gray-400">{userTranscript || "..."}</p>
-                        <p className="text-green-400 font-semibold mt-2">Model is saying:</p>
+                        <p className="text-fission-pink font-semibold mt-2">Model is saying:</p>
                         <p className="ml-4 italic text-gray-400">{modelTranscript || "..."}</p>
                     </div>
                 </div>

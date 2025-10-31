@@ -44,18 +44,18 @@ export const Tts: React.FC = () => {
     return (
         <div className="max-w-2xl mx-auto p-4">
             <h2 className="text-3xl font-bold mb-6">Text-to-Speech</h2>
-            <div className="bg-gray-800 p-6 rounded-lg shadow-lg">
+            <div className="bg-fission-dark-secondary p-6 rounded-lg shadow-lg">
                 <textarea
                     value={text}
                     onChange={(e) => setText(e.target.value)}
                     placeholder="Type anything you want to hear..."
-                    className="w-full p-3 bg-gray-700 text-gemini-text rounded-md border border-gray-600 focus:ring-2 focus:ring-gemini-blue focus:outline-none transition"
+                    className="w-full p-3 bg-fission-dark text-fission-text rounded-md border border-fission-purple focus:ring-2 focus:ring-fission-cyan focus:outline-none transition"
                     rows={5}
                 />
                 <button
                     onClick={handleSpeak}
                     disabled={loading}
-                    className="w-full mt-4 bg-gemini-blue hover:bg-gemini-dark-blue text-white font-bold py-3 px-6 rounded-md transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed"
+                    className="w-full mt-4 bg-fission-cyan hover:bg-fission-pink text-fission-dark font-bold py-3 px-6 rounded-md transition-colors disabled:bg-fission-purple disabled:cursor-not-allowed"
                 >
                     {loading ? 'Generating...' : 'Speak'}
                 </button>

@@ -9,7 +9,8 @@ import { MediaAnalysis } from './components/MediaAnalysis';
 import { Tts } from './components/Tts';
 import { AudioTranscription } from './components/AudioTranscription';
 import { Tab } from './types';
-import { GoogleIcon, ImageSquareIcon, VideoCameraIcon, ChatBubbleIcon, MicrophoneIcon, DocumentMagnifyingGlassIcon, SpeakerWaveIcon, MusicalNoteIcon } from './components/Icons';
+import { FissionPromptIcon, ImageSquareIcon, VideoCameraIcon, ChatBubbleIcon, MicrophoneIcon, DocumentMagnifyingGlassIcon, SpeakerWaveIcon, MusicalNoteIcon, CpuChipIcon } from './components/Icons';
+import { FunctionCalling } from './components/FunctionCalling';
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>(Tab.Chat);
@@ -24,6 +25,8 @@ const App: React.FC = () => {
         return <VideoGen />;
       case Tab.Chat:
         return <Chat />;
+      case Tab.FunctionCalling:
+        return <FunctionCalling />;
       case Tab.LiveConvo:
         return <LiveConvo />;
       case Tab.MediaAnalysis:
@@ -39,6 +42,7 @@ const App: React.FC = () => {
 
   const tabs = [
     { id: Tab.Chat, name: 'Chat', icon: <ChatBubbleIcon /> },
+    { id: Tab.FunctionCalling, name: 'Function Calling', icon: <CpuChipIcon /> },
     { id: Tab.ImageGen, name: 'Image Gen', icon: <ImageSquareIcon /> },
     { id: Tab.ImageEdit, name: 'Image Edit', icon: <ImageSquareIcon /> },
     { id: Tab.VideoGen, name: 'Video Gen', icon: <VideoCameraIcon /> },
@@ -49,20 +53,20 @@ const App: React.FC = () => {
   ];
 
   return (
-    <div className="flex flex-col h-screen bg-gemini-dark-grey font-sans">
-      <header className="flex items-center p-4 border-b border-gray-700">
-        <GoogleIcon />
-        <h1 className="text-xl font-semibold ml-2 text-gemini-text">FissionPrompt</h1>
+    <div className="flex flex-col h-screen bg-fission-dark font-sans">
+      <header className="flex items-center p-4 border-b border-fission-dark-secondary">
+        <FissionPromptIcon />
+        <h1 className="text-xl font-semibold ml-2 text-fission-text">FissionPrompt</h1>
       </header>
       <div className="flex flex-1 overflow-hidden">
-        <nav className="w-64 p-4 border-r border-gray-700 overflow-y-auto">
+        <nav className="w-64 p-4 border-r border-fission-dark-secondary overflow-y-auto">
           <ul>
             {tabs.map(tab => (
               <li key={tab.id} className="mb-2">
                 <button
                   onClick={() => setActiveTab(tab.id)}
                   className={`w-full flex items-center text-left p-3 rounded-lg transition-colors duration-200 ${
-                    activeTab === tab.id ? 'bg-gemini-blue text-white' : 'hover:bg-gray-700 text-gemini-text'
+                    activeTab === tab.id ? 'bg-fission-cyan text-fission-dark' : 'hover:bg-fission-dark-secondary text-fission-text'
                   }`}
                 >
                   <span className="mr-3">{tab.icon}</span>

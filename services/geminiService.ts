@@ -1,5 +1,4 @@
-
-import { GoogleGenAI, GenerateContentResponse, Chat, Modality, Type, VideosOperationResponse, VeoGeneratedVideo, GroundingChunk, LiveSession } from "@google/genai";
+import { GoogleGenAI, GenerateContentResponse, Chat, Modality, Type, VideosOperationResponse, VeoGeneratedVideo, GroundingChunk, LiveSession, FunctionDeclaration, Content } from "@google/genai";
 import { ChatMessage } from "../types";
 
 const getAIClient = () => {
@@ -55,14 +54,14 @@ export const editImage = async (prompt: string, image: { data: string, mimeType:
 };
 
 // --- VIDEO GENERATION ---
-export const generateVideo = async (prompt: string, aspectRatio: "16:9" | "9:16", image?: { data: string, mimeType: string }): Promise<VideosOperationResponse> => {
+export const generateVideo = async (prompt: string, aspectRatio: "16:9" | "9:16", resolution: '720p' | '1080p', image?: { data: string, mimeType: string }): Promise<VideosOperationResponse> => {
     const ai = getAIClient();
     const requestPayload: any = {
         model: 'veo-3.1-fast-generate-preview',
         prompt,
         config: {
             numberOfVideos: 1,
-            resolution: '720p',
+            resolution,
             aspectRatio,
         }
     };
@@ -84,9 +83,9 @@ export const getVideosOperation = async (operation: VideosOperationResponse): Pr
 
 
 // --- CHAT ---
-export const generateChatResponse = async (history: ChatMessage[], latestMessage: string, useSearch: boolean, useMaps: boolean, useThinking: boolean, userLocation?: {latitude: number, longitude: number}): Promise<{text: string; groundingChunks?: GroundingChunk[]}> => {
+export const generateChatResponse = async (history: ChatMessage[], latestMessage: string, useSearchGrounding: boolean, useMaps: boolean, useThinking: boolean, userLocation?: {latitude: number, longitude: number}): Promise<{text: string; groundingChunks?: GroundingChunk[]}> => {
     const ai = getAIClient();
-    const modelName = useThinking ? 'gemini-2.5-pro' : (useSearch || useMaps ? 'gemini-2.5-flash' : 'gemini-2.5-flash-lite');
+    const modelName = useThinking ? 'gemini-2.5-pro' : (useSearchGrounding || useMaps ? 'gemini-2.5-flash' : 'gemini-2.5-flash-lite');
 
     const contents = [...history.map(msg => ({
         role: msg.sender,
@@ -98,9 +97,9 @@ export const generateChatResponse = async (history: ChatMessage[], latestMessage
         config.thinkingConfig = { thinkingBudget: 32768 };
     }
 
-    if (useSearch || useMaps) {
+    if (useSearchGrounding || useMaps) {
         config.tools = [];
-        if (useSearch) config.tools.push({ googleSearch: {} });
+        if (useSearchGrounding) config.tools.push({ googleSearch: {} });
         if (useMaps) config.tools.push({ googleMaps: {} });
         if (useMaps && userLocation) {
              config.toolConfig = {
@@ -121,6 +120,36 @@ export const generateChatResponse = async (history: ChatMessage[], latestMessage
         text: response.text,
         groundingChunks: response.candidates?.[0]?.groundingMetadata?.groundingChunks as GroundingChunk[] || undefined
     };
+};
+
+// --- FUNCTION CALLING ---
+const getWeatherFunctionDeclaration: FunctionDeclaration = {
+    name: 'getWeather',
+    parameters: {
+        type: Type.OBJECT,
+        description: 'Get the current weather for a specific city.',
+        properties: {
+            city: {
+                type: Type.STRING,
+                description: 'The name of the city, e.g., "London" or "Tokyo".',
+            },
+        },
+        required: ['city'],
+    },
+};
+
+export const sendFunctionCallMessage = async (history: Content[]): Promise<GenerateContentResponse> => {
+    const ai = getAIClient();
+    
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: history,
+        config: {
+            tools: [{ functionDeclarations: [getWeatherFunctionDeclaration] }],
+        },
+    });
+
+    return response;
 };
 
 // --- MEDIA ANALYSIS ---

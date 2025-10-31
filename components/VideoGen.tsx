@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { generateVideo, getVideosOperation } from '../services/geminiService';
 import { fileToBase64 } from '../utils/helpers';
@@ -17,7 +16,10 @@ const loadingMessages = [
 export const VideoGen: React.FC = () => {
     const [prompt, setPrompt] = useState('');
     const [aspectRatio, setAspectRatio] = useState<'16:9' | '9:16'>('16:9');
+    const [resolution, setResolution] = useState<'720p' | '1080p'>('720p');
     const [image, setImage] = useState<{ file: File; url: string } | null>(null);
+    const [duration, setDuration] = useState(4);
+    const [style, setStyle] = useState('none');
     const [generatedVideo, setGeneratedVideo] = useState<VeoGeneratedVideo | null>(null);
     const [loading, setLoading] = useState(false);
     const [loadingMessage, setLoadingMessage] = useState(loadingMessages[0]);
@@ -105,8 +107,19 @@ export const VideoGen: React.FC = () => {
         setGeneratedVideo(null);
         
         try {
+            let finalPrompt = prompt;
+            const styleText = style !== 'none' ? ` in a ${style} style` : '';
+            const durationText = `, ${duration} seconds long`;
+
+            if(finalPrompt) {
+                finalPrompt = `${finalPrompt}${styleText}${durationText}`;
+            } else {
+                // Case for image-only generation
+                finalPrompt = `Animate the provided image${styleText}${durationText}`;
+            }
+            
             const imagePayload = image ? { data: await fileToBase64(image.file), mimeType: image.file.type } : undefined;
-            const operation = await generateVideo(prompt, aspectRatio, imagePayload);
+            const operation = await generateVideo(finalPrompt, aspectRatio, resolution, imagePayload);
             pollOperation(operation);
         } catch (e: any) {
              if(e.message?.includes("Requested entity was not found")){
@@ -122,13 +135,13 @@ export const VideoGen: React.FC = () => {
     if (!apiKeySelected) {
         return (
              <div className="max-w-2xl mx-auto p-4 text-center">
-                <h2 className="text-3xl font-bold mb-4 text-gemini-text">Video Generation with Veo</h2>
-                <div className="bg-gray-800 p-6 rounded-lg shadow-lg">
+                <h2 className="text-3xl font-bold mb-4 text-fission-text">Video Generation with Veo</h2>
+                <div className="bg-fission-dark-secondary p-6 rounded-lg shadow-lg">
                     <p className="mb-4">To use this feature, you need to select an API key. Video generation is a billable service.</p>
-                    <p className="text-sm text-gray-400 mb-6">For more information, see the <a href="https://ai.google.dev/gemini-api/docs/billing" target="_blank" rel="noopener noreferrer" className="text-gemini-blue hover:underline">billing documentation</a>.</p>
+                    <p className="text-sm text-gray-400 mb-6">For more information, see the <a href="https://ai.google.dev/gemini-api/docs/billing" target="_blank" rel="noopener noreferrer" className="text-fission-cyan hover:underline">billing documentation</a>.</p>
                     <button
                         onClick={handleSelectKey}
-                        className="bg-gemini-blue hover:bg-gemini-dark-blue text-white font-bold py-2 px-6 rounded-md transition-colors"
+                        className="bg-fission-cyan hover:bg-fission-pink text-fission-dark font-bold py-2 px-6 rounded-md transition-colors"
                     >
                         Select API Key
                     </button>
@@ -140,19 +153,20 @@ export const VideoGen: React.FC = () => {
 
     return (
         <div className="max-w-4xl mx-auto p-4">
-            <h2 className="text-3xl font-bold mb-6 text-gemini-text">Video Generation</h2>
-            <div className="bg-gray-800 p-6 rounded-lg shadow-lg">
+            <h2 className="text-3xl font-bold mb-6 text-fission-text">Video Generation</h2>
+            <div className="bg-fission-dark-secondary p-6 rounded-lg shadow-lg">
                 <textarea
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
                     placeholder="e.g., A neon hologram of a cat driving at top speed."
-                    className="w-full p-3 bg-gray-700 text-gemini-text rounded-md border border-gray-600 focus:ring-2 focus:ring-gemini-blue focus:outline-none transition"
+                    className="w-full p-3 bg-fission-dark text-fission-text rounded-md border border-fission-purple focus:ring-2 focus:ring-fission-cyan focus:outline-none transition"
                     rows={3}
                 />
+                
                 <div className="mt-4">
-                    <h3 className="text-lg font-medium mb-2">Optional Starting Image</h3>
+                    <h3 className="text-lg font-medium mb-2 text-fission-text">Optional Starting Image</h3>
                     <div 
-                        className="border-2 border-dashed border-gray-600 rounded-lg p-4 text-center cursor-pointer hover:border-gemini-blue transition"
+                        className="border-2 border-dashed border-fission-purple rounded-lg p-4 text-center cursor-pointer hover:border-fission-cyan transition"
                         onClick={() => fileInputRef.current?.click()}
                     >
                          <input
@@ -169,23 +183,79 @@ export const VideoGen: React.FC = () => {
                         )}
                     </div>
                 </div>
-                <div className="flex items-center justify-between mt-4">
-                     <div className="flex items-center">
-                        <label htmlFor="aspectRatioVid" className="mr-2 text-gemini-text">Aspect Ratio:</label>
-                        <select
-                            id="aspectRatioVid"
-                            value={aspectRatio}
-                            onChange={(e) => setAspectRatio(e.target.value as '16:9' | '9:16')}
-                            className="bg-gray-700 text-gemini-text p-2 rounded-md border border-gray-600 focus:ring-2 focus:ring-gemini-blue focus:outline-none"
-                        >
-                            <option value="16:9">16:9 (Landscape)</option>
-                            <option value="9:16">9:16 (Portrait)</option>
-                        </select>
+
+                <div className="mt-6 border-t border-fission-purple pt-4">
+                    <h3 className="text-lg font-medium mb-4 text-fission-text">Generation Settings</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label htmlFor="duration" className="block text-sm font-medium text-fission-text mb-2">Duration ({duration}s)</label>
+                            <input
+                                id="duration"
+                                type="range"
+                                min="2"
+                                max="15"
+                                value={duration}
+                                onChange={(e) => setDuration(Number(e.target.value))}
+                                className="w-full h-2 bg-fission-purple rounded-lg appearance-none cursor-pointer accent-fission-cyan"
+                            />
+                        </div>
+                        <div>
+                            <label htmlFor="style" className="block text-sm font-medium text-fission-text mb-2">Visual Style</label>
+                            <select
+                                id="style"
+                                value={style}
+                                onChange={(e) => setStyle(e.target.value)}
+                                className="w-full bg-fission-dark text-fission-text p-2 rounded-md border border-fission-purple focus:ring-2 focus:ring-fission-cyan focus:outline-none"
+                            >
+                                <option value="none">Default</option>
+                                <option value="cinematic">Cinematic</option>
+                                <option value="photorealistic">Photorealistic</option>
+                                <option value="anime">Anime</option>
+                                <option value="synthwave">Synthwave</option>
+                                <option value="vaporwave">Vaporwave</option>
+                                <option value="steampunk">Steampunk</option>
+                                <option value="cyberpunk">Cyberpunk</option>
+                                <option value="impressionistic">Impressionistic</option>
+                                <option value="claymation">Claymation</option>
+                                <option value="black and white">Black and White</option>
+                                <option value="futuristic">Futuristic</option>
+                                <option value="fantasy">Fantasy</option>
+                                <option value="documentary">Documentary</option>
+                                <option value="abstract">Abstract</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label htmlFor="aspectRatioVid" className="block text-sm font-medium text-fission-text mb-2">Aspect Ratio</label>
+                            <select
+                                id="aspectRatioVid"
+                                value={aspectRatio}
+                                onChange={(e) => setAspectRatio(e.target.value as '16:9' | '9:16')}
+                                className="w-full bg-fission-dark text-fission-text p-2 rounded-md border border-fission-purple focus:ring-2 focus:ring-fission-cyan focus:outline-none"
+                            >
+                                <option value="16:9">16:9 (Landscape)</option>
+                                <option value="9:16">9:16 (Portrait)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label htmlFor="resolutionVid" className="block text-sm font-medium text-fission-text mb-2">Quality</label>
+                            <select
+                                id="resolutionVid"
+                                value={resolution}
+                                onChange={(e) => setResolution(e.target.value as '720p' | '1080p')}
+                                className="w-full bg-fission-dark text-fission-text p-2 rounded-md border border-fission-purple focus:ring-2 focus:ring-fission-cyan focus:outline-none"
+                            >
+                                <option value="720p">Standard (720p)</option>
+                                <option value="1080p">HD (1080p)</option>
+                            </select>
+                        </div>
                     </div>
+                </div>
+                
+                <div className="mt-6">
                     <button
                         onClick={handleGenerate}
                         disabled={loading}
-                        className="bg-gemini-blue hover:bg-gemini-dark-blue text-white font-bold py-2 px-6 rounded-md transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed"
+                        className="w-full bg-fission-cyan hover:bg-fission-pink text-fission-dark font-bold py-3 px-6 rounded-md transition-colors disabled:bg-fission-purple disabled:cursor-not-allowed text-lg"
                     >
                         {loading ? 'Generating...' : 'Generate Video'}
                     </button>
@@ -196,15 +266,15 @@ export const VideoGen: React.FC = () => {
 
             {loading && (
                 <div className="mt-6 text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gemini-blue mx-auto"></div>
-                    <p className="mt-4 text-gemini-text text-lg">{loadingMessage}</p>
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-fission-cyan mx-auto"></div>
+                    <p className="mt-4 text-fission-text text-lg">{loadingMessage}</p>
                     <p className="text-sm text-gray-400 mt-2">Video generation can take a few minutes. Please be patient.</p>
                 </div>
             )}
             
             {generatedVideo && (
                 <div className="mt-6">
-                    <h3 className="text-xl font-semibold mb-4 text-gemini-text">Result:</h3>
+                    <h3 className="text-xl font-semibold mb-4 text-fission-text">Result:</h3>
                     <video 
                       controls 
                       src={`${generatedVideo.video.uri}&key=${process.env.API_KEY}`} 

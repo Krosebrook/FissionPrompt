@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>FissionPrompt</title>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -11,11 +11,13 @@
         theme: {
           extend: {
             colors: {
-              'gemini-blue': '#1a73e8',
-              'gemini-dark-blue': '#0b57d0',
-              'gemini-grey': '#f1f3f4',
-              'gemini-dark-grey': '#202124',
-              'gemini-text': '#e8eaed',
+              'fission-dark': '#0d0221',
+              'fission-dark-secondary': '#261b3e',
+              'fission-purple': '#7b3e81',
+              'fission-pink': '#f04e98',
+              'fission-cyan': '#00f6ff',
+              'fission-cyan-dark': '#00d1d8',
+              'fission-text': '#e0e0e0',
             }
           }
         }
@@ -27,12 +29,14 @@
     "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
     "react/": "https://aistudiocdn.com/react@^19.2.0/",
     "react": "https://aistudiocdn.com/react@^19.2.0",
-    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.28.0"
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.28.0",
+    "react-markdown": "https://aistudiocdn.com/react-markdown@^9.0.1",
+    "remark-gfm": "https://aistudiocdn.com/remark-gfm@^4.0.0"
   }
 }
 </script>
 </head>
-  <body class="bg-gemini-dark-grey text-gemini-text">
+  <body class="bg-fission-dark text-fission-text">
     <div id="root"></div>
   </body>
 </html>

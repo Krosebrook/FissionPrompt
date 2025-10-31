@@ -6,7 +6,8 @@ export enum Tab {
   LiveConvo = 'liveConvo',
   MediaAnalysis = 'mediaAnalysis',
   Tts = 'tts',
-  AudioTranscription = 'audioTranscription'
+  AudioTranscription = 'audioTranscription',
+  FunctionCalling = 'functionCalling'
 }
 
 export interface ChatMessage {

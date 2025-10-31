@@ -42,12 +42,12 @@ export const ImageEdit: React.FC = () => {
 
     return (
         <div className="max-w-6xl mx-auto p-4">
-            <h2 className="text-3xl font-bold mb-6 text-gemini-text">Image Editing</h2>
+            <h2 className="text-3xl font-bold mb-6 text-fission-text">Image Editing</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
                     <h3 className="text-xl font-semibold mb-4">1. Upload Image</h3>
                     <div 
-                        className="border-2 border-dashed border-gray-600 rounded-lg p-6 text-center cursor-pointer hover:border-gemini-blue transition"
+                        className="border-2 border-dashed border-fission-purple rounded-lg p-6 text-center cursor-pointer hover:border-fission-cyan transition"
                         onClick={() => fileInputRef.current?.click()}
                     >
                         <input
@@ -70,13 +70,13 @@ export const ImageEdit: React.FC = () => {
                         value={prompt}
                         onChange={(e) => setPrompt(e.target.value)}
                         placeholder="e.g., Add a retro filter, or remove the person in the background"
-                        className="w-full p-3 bg-gray-700 text-gemini-text rounded-md border border-gray-600 focus:ring-2 focus:ring-gemini-blue focus:outline-none transition"
+                        className="w-full p-3 bg-fission-dark text-fission-text rounded-md border border-fission-purple focus:ring-2 focus:ring-fission-cyan focus:outline-none transition"
                         rows={5}
                     />
                     <button
                         onClick={handleGenerate}
                         disabled={loading || !originalImage}
-                        className="w-full mt-4 bg-gemini-blue hover:bg-gemini-dark-blue text-white font-bold py-3 px-6 rounded-md transition-colors disabled:bg-gray-600 disabled:cursor-not-allowed"
+                        className="w-full mt-4 bg-fission-cyan hover:bg-fission-pink text-fission-dark font-bold py-3 px-6 rounded-md transition-colors disabled:bg-fission-purple disabled:cursor-not-allowed"
                     >
                         {loading ? 'Generating...' : 'Generate Edit'}
                     </button>
@@ -87,8 +87,8 @@ export const ImageEdit: React.FC = () => {
 
              {loading && (
                 <div className="mt-8 text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gemini-blue mx-auto"></div>
-                    <p className="mt-2 text-gemini-text">Applying your edits, please wait...</p>
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-fission-cyan mx-auto"></div>
+                    <p className="mt-2 text-fission-text">Applying your edits, please wait...</p>
                 </div>
             )}
             

@@ -66,10 +66,10 @@ export const AudioTranscription: React.FC = () => {
     return (
         <div className="max-w-2xl mx-auto p-4">
             <h2 className="text-3xl font-bold mb-6">Audio Transcription</h2>
-            <div className="bg-gray-800 p-6 rounded-lg shadow-lg text-center">
+            <div className="bg-fission-dark-secondary p-6 rounded-lg shadow-lg text-center">
                 <button
                     onClick={toggleRecording}
-                    className={`px-8 py-4 rounded-full font-bold text-white transition-colors text-xl ${isRecording ? 'bg-red-600 hover:bg-red-700' : 'bg-gemini-blue hover:bg-gemini-dark-blue'}`}
+                    className={`px-8 py-4 rounded-full font-bold text-fission-dark transition-colors text-xl ${isRecording ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-fission-cyan hover:bg-fission-pink'}`}
                 >
                     {isRecording ? 'Stop Recording' : 'Start Recording'}
                 </button>
@@ -80,13 +80,13 @@ export const AudioTranscription: React.FC = () => {
 
             {loading && (
                 <div className="mt-6 text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gemini-blue mx-auto"></div>
-                    <p className="mt-2 text-gemini-text">Transcribing audio...</p>
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-fission-cyan mx-auto"></div>
+                    <p className="mt-2 text-fission-text">Transcribing audio...</p>
                 </div>
             )}
 
             {transcription && (
-                <div className="mt-6 bg-gray-800 p-6 rounded-lg shadow-lg">
+                <div className="mt-6 bg-fission-dark-secondary p-6 rounded-lg shadow-lg">
                     <h3 className="text-xl font-semibold mb-4">Transcription:</h3>
                     <p className="whitespace-pre-wrap">{transcription}</p>
                 </div>

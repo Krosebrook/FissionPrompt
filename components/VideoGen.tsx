@@ -25,6 +25,7 @@ export const VideoGen: React.FC = () => {
     const [loadingMessage, setLoadingMessage] = useState(loadingMessages[0]);
     const [error, setError] = useState<string | null>(null);
     const [apiKeySelected, setApiKeySelected] = useState(false);
+    const [isDownloading, setIsDownloading] = useState(false);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
     const pollingIntervalRef = useRef<number | null>(null);
@@ -129,6 +130,33 @@ export const VideoGen: React.FC = () => {
                 setError(`Failed to start video generation: ${e.message}`);
              }
             setLoading(false);
+        }
+    };
+
+    const handleSaveVideo = async () => {
+        if (!generatedVideo) return;
+        setIsDownloading(true);
+        setError(null);
+        try {
+            const response = await fetch(`${generatedVideo.video.uri}&key=${process.env.API_KEY}`);
+            if (!response.ok) {
+                throw new Error(`Failed to fetch video: ${response.statusText}`);
+            }
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+            a.download = `fissionprompt-video-${timestamp}.mp4`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            a.remove();
+        } catch (e: any) {
+            setError(`Failed to download video: ${e.message}`);
+        } finally {
+            setIsDownloading(false);
         }
     };
 
@@ -273,13 +301,20 @@ export const VideoGen: React.FC = () => {
             )}
             
             {generatedVideo && (
-                <div className="mt-6">
+                <div className="mt-6 text-center">
                     <h3 className="text-xl font-semibold mb-4 text-fission-text">Result:</h3>
                     <video 
                       controls 
                       src={`${generatedVideo.video.uri}&key=${process.env.API_KEY}`} 
                       className="rounded-lg shadow-lg w-full max-w-lg mx-auto"
                     />
+                    <button
+                        onClick={handleSaveVideo}
+                        disabled={isDownloading}
+                        className="mt-4 bg-fission-cyan-dark hover:bg-fission-pink text-fission-dark font-bold py-2 px-6 rounded-md transition-colors disabled:bg-fission-purple disabled:cursor-not-allowed"
+                    >
+                        {isDownloading ? 'Downloading...' : 'Save Video'}
+                    </button>
                 </div>
             )}
         </div>

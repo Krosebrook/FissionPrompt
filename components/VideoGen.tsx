@@ -269,9 +269,9 @@ export const VideoGen: React.FC = () => {
                             </select>
                         </div>
                         <div>
-                            <label htmlFor="resolutionVid" className="block text-sm font-medium text-fission-text mb-2">Quality</label>
+                            <label htmlFor="resolution" className="block text-sm font-medium text-fission-text mb-2">Quality</label>
                             <select
-                                id="resolutionVid"
+                                id="resolution"
                                 value={resolution}
                                 onChange={(e) => setResolution(e.target.value as '720p' | '1080p')}
                                 className="w-full bg-fission-dark text-fission-text p-2 rounded-md border border-fission-purple focus:ring-2 focus:ring-fission-cyan focus:outline-none"

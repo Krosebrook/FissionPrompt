@@ -4,10 +4,10 @@ import { generateImage } from '../services/geminiService';
 import { Spinner } from './Spinner';
 
 const promptSuggestions = [
-    "A majestic lion wearing a crown, sitting on a throne in a futuristic city.",
-    "An oil painting of a serene cherry blossom garden at night, with a glowing full moon.",
-    "A synthwave-style illustration of a retro sports car driving into a sunset.",
-    "A cute, fluffy alien creature exploring a vibrant, candy-colored forest.",
+    "A detailed photo of a robot barista making coffee in a rustic cafe.",
+    "An epic landscape of a floating island city at sunrise, fantasy art.",
+    "A cat DJing at a neon-lit nightclub, vibrant and energetic.",
+    "Logo for a tech company called 'Nova', minimalist, geometric, blue and silver.",
 ];
 
 const stylePresets = [
@@ -24,9 +24,9 @@ const stylePresets = [
 
 
 export const ImageGen: React.FC = () => {
-    const [prompt, setPrompt] = useState('');
+    const [prompt, setPrompt] = useState('A detailed photo of a robot barista making coffee in a rustic cafe.');
     const [aspectRatio, setAspectRatio] = useState('1:1');
-    const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
+    const [selectedStyle, setSelectedStyle] = useState<string>('none');
     const [generatedImage, setGeneratedImage] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -41,9 +41,11 @@ export const ImageGen: React.FC = () => {
         setGeneratedImage(null);
         
         let finalPrompt = prompt;
-        const activeStyle = stylePresets.find(s => s.name === selectedStyle);
-        if (activeStyle) {
-            finalPrompt += activeStyle.prompt;
+        if (selectedStyle !== 'none') {
+            const activeStyle = stylePresets.find(s => s.name === selectedStyle);
+            if (activeStyle) {
+                finalPrompt += activeStyle.prompt;
+            }
         }
 
         try {
@@ -61,8 +63,8 @@ export const ImageGen: React.FC = () => {
         setPrompt(suggestion);
     };
 
-    const handleStyleClick = (styleName: string) => {
-        setSelectedStyle(prevStyle => prevStyle === styleName ? null : styleName);
+    const handleStyleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+        setSelectedStyle(event.target.value);
     };
 
     return (
@@ -78,7 +80,7 @@ export const ImageGen: React.FC = () => {
                 />
                 
                 <div className="my-4">
-                    <p className="text-sm text-gray-400 mb-2">Need inspiration? Try one of these:</p>
+                    <p className="text-sm font-medium text-fission-text mb-2">Quick Prompts:</p>
                     <div className="flex flex-wrap gap-2">
                         {promptSuggestions.map((suggestion, index) => (
                             <button
@@ -93,22 +95,20 @@ export const ImageGen: React.FC = () => {
                 </div>
 
                 <div className="my-4 border-t border-fission-purple pt-4">
-                    <p className="text-sm text-gray-400 mb-2">Add a style:</p>
-                    <div className="flex flex-wrap gap-2">
+                    <label htmlFor="stylePreset" className="block text-sm text-gray-400 mb-2">Add a style:</label>
+                    <select
+                        id="stylePreset"
+                        value={selectedStyle}
+                        onChange={handleStyleChange}
+                        className="w-full bg-fission-dark text-fission-text p-2 rounded-md border border-fission-purple focus:ring-2 focus:ring-fission-cyan focus:outline-none"
+                    >
+                        <option value="none">None</option>
                         {stylePresets.map((style) => (
-                            <button
-                                key={style.name}
-                                onClick={() => handleStyleClick(style.name)}
-                                className={`py-2 px-4 rounded-md transition-colors text-sm font-semibold ${
-                                    selectedStyle === style.name 
-                                    ? 'bg-fission-cyan text-fission-dark' 
-                                    : 'bg-fission-dark hover:bg-fission-purple text-fission-text'
-                                }`}
-                            >
+                            <option key={style.name} value={style.name}>
                                 {style.name}
-                            </button>
+                            </option>
                         ))}
-                    </div>
+                    </select>
                 </div>
 
                 <div className="flex items-center justify-between mt-4 border-t border-fission-purple pt-4">

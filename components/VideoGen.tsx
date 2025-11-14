@@ -311,13 +311,22 @@ export const VideoGen: React.FC = () => {
                       src={`${generatedVideo.video.uri}&key=${process.env.API_KEY}`} 
                       className="rounded-lg shadow-lg w-full max-w-lg mx-auto"
                     />
-                    <button
-                        onClick={handleSaveVideo}
-                        disabled={isDownloading}
-                        className="mt-4 bg-fission-cyan-dark hover:bg-fission-pink text-fission-dark font-bold py-2 px-6 rounded-md transition-colors disabled:bg-fission-purple disabled:cursor-not-allowed"
-                    >
-                        {isDownloading ? 'Downloading...' : 'Save Video'}
-                    </button>
+                    <div className="mt-4 flex justify-center gap-4">
+                        <button
+                            onClick={handleGenerate}
+                            disabled={loading}
+                            className="bg-fission-purple hover:bg-fission-pink text-fission-text font-bold py-2 px-6 rounded-md transition-colors disabled:bg-fission-dark-secondary disabled:cursor-not-allowed"
+                        >
+                            Regenerate
+                        </button>
+                        <button
+                            onClick={handleSaveVideo}
+                            disabled={isDownloading || loading}
+                            className="bg-fission-cyan-dark hover:bg-fission-pink text-fission-dark font-bold py-2 px-6 rounded-md transition-colors disabled:bg-fission-purple disabled:cursor-not-allowed"
+                        >
+                            {isDownloading ? 'Downloading...' : 'Save Video'}
+                        </button>
+                    </div>
                 </div>
             )}
         </div>

@@ -2,6 +2,7 @@
 import React, { useState, useRef } from 'react';
 import { editImage } from '../services/geminiService';
 import { fileToBase64 } from '../utils/helpers';
+import { Spinner } from './Spinner';
 
 export const ImageEdit: React.FC = () => {
     const [prompt, setPrompt] = useState('');
@@ -86,9 +87,8 @@ export const ImageEdit: React.FC = () => {
             {error && <div className="mt-6 text-red-400 bg-red-900/50 p-3 rounded-md">{error}</div>}
 
              {loading && (
-                <div className="mt-8 text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-fission-cyan mx-auto"></div>
-                    <p className="mt-2 text-fission-text">Applying your edits, please wait...</p>
+                <div className="mt-8">
+                    <Spinner message="Applying your edits, please wait..." />
                 </div>
             )}
             

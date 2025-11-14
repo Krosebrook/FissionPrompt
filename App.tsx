@@ -11,6 +11,7 @@ import { AudioTranscription } from './components/AudioTranscription';
 import { Tab } from './types';
 import { FissionPromptIcon, ImageSquareIcon, VideoCameraIcon, ChatBubbleIcon, MicrophoneIcon, DocumentMagnifyingGlassIcon, SpeakerWaveIcon, MusicalNoteIcon, CpuChipIcon } from './components/Icons';
 import { FunctionCalling } from './components/FunctionCalling';
+import { BackgroundMusic } from './components/BackgroundMusic';
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>(Tab.Chat);
@@ -80,6 +81,7 @@ const App: React.FC = () => {
           {renderTabContent()}
         </main>
       </div>
+      <BackgroundMusic />
     </div>
   );
 };

@@ -1,10 +1,46 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { generateChatResponse } from '../services/geminiService';
 import { ChatMessage, GroundingChunk } from '../types';
-import { UserIcon, SparklesIcon } from './Icons';
+import { UserIcon, SparklesIcon, TrashIcon, ClipboardIcon } from './Icons';
+
+
+// Fix: The 'children' prop is made optional to resolve a TypeScript inference issue with react-markdown.
+const CodeBlock = ({ className, children }: { className?: string; children?: React.ReactNode }) => {
+    const [isCopied, setIsCopied] = useState(false);
+    const language = className?.replace(/language-/, '') || '';
+
+    const handleCopy = () => {
+        // Fix: Use a fallback for children to prevent errors if it's undefined.
+        const codeToCopy = String(children || '').replace(/\n$/, '');
+        navigator.clipboard.writeText(codeToCopy);
+        setIsCopied(true);
+        setTimeout(() => setIsCopied(false), 2000);
+    };
+    
+    return (
+      <div className="bg-fission-dark my-2 rounded-lg overflow-hidden border border-fission-purple/50">
+        <div className="flex justify-between items-center px-4 py-1.5 bg-fission-dark-secondary/50">
+          <span className="text-xs font-sans text-gray-400 capitalize">{language}</span>
+          <button 
+            onClick={handleCopy} 
+            className="text-xs flex items-center gap-1.5 text-gray-400 hover:text-fission-cyan transition-colors disabled:text-gray-600" 
+            disabled={isCopied}
+            aria-label="Copy code to clipboard"
+          >
+            <ClipboardIcon />
+            {isCopied ? 'Copied!' : 'Copy'}
+          </button>
+        </div>
+        <pre className="p-4 overflow-x-auto">
+          {/* Fix: Added fallback for className to prevent rendering "undefined" */}
+          <code className={`font-mono text-sm text-fission-text ${className || ''}`}>{children}</code>
+        </pre>
+      </div>
+    );
+};
+
 
 // Custom components to style markdown output
 const markdownComponents = {
@@ -15,15 +51,13 @@ const markdownComponents = {
     ul: ({...props}) => <ul className="list-disc list-inside my-2 space-y-1" {...props} />,
     ol: ({...props}) => <ol className="list-decimal list-inside my-2 space-y-1" {...props} />,
     li: ({...props}) => <li className="my-1" {...props} />,
-    code: ({ inline, className, children, ...props }: any) => {
+    code: ({ inline, className, children, ...props }: { inline?: boolean; className?: string; children: React.ReactNode; [key: string]: any }) => {
         return !inline ? (
-        <pre className="bg-fission-dark-secondary p-3 rounded-md my-2 overflow-x-auto">
-            <code className="font-mono text-sm text-fission-text" {...props}>{children}</code>
-        </pre>
+            <CodeBlock className={className}>{children}</CodeBlock>
         ) : (
-        <code className="bg-fission-dark-secondary px-1.5 py-1 rounded-md font-mono text-sm" {...props}>
-            {children}
-        </code>
+            <code className="bg-fission-purple/20 text-fission-pink px-1.5 py-1 rounded-md font-mono text-sm" {...props}>
+                {children}
+            </code>
         );
     },
     a: ({...props}) => <a className="text-fission-cyan hover:underline" target="_blank" rel="noopener noreferrer" {...props} />,
@@ -97,6 +131,11 @@ export const Chat: React.FC = () => {
         }
     };
     
+    const handleClearChat = () => {
+        setMessages([]);
+        setError(null);
+    };
+
     const renderGrounding = (chunks: GroundingChunk[]) => (
         <div className="mt-2 text-sm">
             <h4 className="font-semibold text-gray-300">Sources:</h4>
@@ -151,28 +190,42 @@ export const Chat: React.FC = () => {
 
     return (
         <div className="flex flex-col h-full max-w-4xl mx-auto">
-            <h2 className="text-3xl font-bold mb-4 text-fission-text">Chat with Gemini</h2>
+            <div className="flex justify-between items-center mb-4">
+                <h2 className="text-3xl font-bold text-fission-text">Chat with Gemini</h2>
+                {messages.length > 0 && (
+                    <button
+                        onClick={handleClearChat}
+                        disabled={loading}
+                        className="p-2 rounded-full text-gray-400 hover:bg-fission-dark hover:text-fission-cyan transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        title="Clear Chat"
+                    >
+                        <TrashIcon />
+                    </button>
+                )}
+            </div>
             <div className="flex-1 overflow-y-auto p-4 bg-fission-dark-secondary rounded-t-lg">
                 {messages.map((msg, index) => (
-                    <div key={index} className={`flex items-start gap-3 my-4 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                     <div key={index} className={`flex items-start gap-3 my-4 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
                         {msg.sender === 'model' &&
-                            <div className="flex-shrink-0 p-2 rounded-full bg-fission-purple">
+                            <div className="flex-shrink-0 p-2 rounded-full bg-fission-purple self-start mt-1">
                                 <SparklesIcon />
                             </div>
                         }
-                        <div className={`max-w-xl rounded-lg p-3 ${msg.sender === 'user' ? 'bg-fission-purple' : 'bg-fission-dark'}`}>
-                            {msg.sender === 'model' ? (
-                                <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
-                                    {msg.text}
-                                </ReactMarkdown>
-                            ) : (
-                                <p className="whitespace-pre-wrap">{msg.text}</p>
-                            )}
-                            {msg.groundingChunks && renderGrounding(msg.groundingChunks)}
-                            <div className={`text-right text-xs mt-1 ${msg.sender === 'user' ? 'text-purple-200' : 'text-gray-400'}`}>{msg.timestamp}</div>
+                        <div className={`flex flex-col max-w-xl ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}>
+                            <div className={`rounded-lg p-3 ${msg.sender === 'user' ? 'bg-fission-purple' : 'bg-fission-dark'}`}>
+                                {msg.sender === 'model' ? (
+                                    <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
+                                        {msg.text}
+                                    </ReactMarkdown>
+                                ) : (
+                                    <p className="whitespace-pre-wrap">{msg.text}</p>
+                                )}
+                                {msg.groundingChunks && renderGrounding(msg.groundingChunks)}
+                            </div>
+                            <div className="text-xs mt-1.5 text-gray-500 px-1">{msg.timestamp}</div>
                         </div>
                         {msg.sender === 'user' &&
-                            <div className="flex-shrink-0 p-2 rounded-full bg-fission-cyan">
+                            <div className="flex-shrink-0 p-2 rounded-full bg-fission-cyan self-start mt-1">
                                 <UserIcon/>
                             </div>
                         }
@@ -180,15 +233,11 @@ export const Chat: React.FC = () => {
                 ))}
                 {loading && (
                     <div className="flex items-start gap-3 my-4">
-                        <div className="p-2 rounded-full bg-fission-purple">
-                             <SparklesIcon />
+                        <div className="flex-shrink-0 p-2 rounded-full bg-fission-purple self-start mt-1">
+                             <SparklesIcon className="animate-pulse" />
                         </div>
-                        <div className="max-w-xl p-3 rounded-lg bg-fission-dark">
-                            <div className="flex items-center space-x-2">
-                                <div className="w-2 h-2 bg-fission-cyan rounded-full animate-pulse"></div>
-                                <div className="w-2 h-2 bg-fission-cyan rounded-full animate-pulse delay-75"></div>
-                                <div className="w-2 h-2 bg-fission-cyan rounded-full animate-pulse delay-150"></div>
-                            </div>
+                        <div className="max-w-xl p-3 rounded-lg bg-fission-dark self-center">
+                           <p className="text-sm italic text-gray-400">Gemini is thinking...</p>
                         </div>
                     </div>
                 )}

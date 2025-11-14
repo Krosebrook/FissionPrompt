@@ -2,6 +2,7 @@
 import React, { useState, useRef } from 'react';
 import { transcribeAudio } from '../services/geminiService';
 import { blobToBase64 } from '../utils/helpers';
+import { Spinner } from './Spinner';
 
 export const AudioTranscription: React.FC = () => {
     const [isRecording, setIsRecording] = useState(false);
@@ -78,12 +79,7 @@ export const AudioTranscription: React.FC = () => {
 
             {error && <div className="mt-4 text-red-400 bg-red-900/50 p-3 rounded-md">{error}</div>}
 
-            {loading && (
-                <div className="mt-6 text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-fission-cyan mx-auto"></div>
-                    <p className="mt-2 text-fission-text">Transcribing audio...</p>
-                </div>
-            )}
+            {loading && <Spinner message="Transcribing audio..." />}
 
             {transcription && (
                 <div className="mt-6 bg-fission-dark-secondary p-6 rounded-lg shadow-lg">

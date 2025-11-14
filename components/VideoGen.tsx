@@ -1,8 +1,10 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { generateVideo, getVideosOperation } from '../services/geminiService';
 import { fileToBase64 } from '../utils/helpers';
 import { VeoGeneratedVideo } from '../types';
 import type { VideosOperationResponse } from '@google/genai';
+import { Spinner } from './Spinner';
 
 
 const loadingMessages = [
@@ -11,6 +13,24 @@ const loadingMessages = [
     "Rendering your cinematic masterpiece...",
     "Applying the final digital polish...",
     "Almost ready for the premiere...",
+];
+
+const visualStyles = [
+    { value: 'none', label: 'Default' },
+    { value: 'cinematic', label: 'Cinematic' },
+    { value: 'photorealistic', label: 'Photorealistic' },
+    { value: 'anime', label: 'Anime' },
+    { value: 'synthwave', label: 'Synthwave' },
+    { value: 'vaporwave', label: 'Vaporwave' },
+    { value: 'steampunk', label: 'Steampunk' },
+    { value: 'cyberpunk', label: 'Cyberpunk' },
+    { value: 'impressionistic', label: 'Impressionistic' },
+    { value: 'claymation', label: 'Claymation' },
+    { value: 'black and white', label: 'Black and White' },
+    { value: 'futuristic', label: 'Futuristic' },
+    { value: 'fantasy', label: 'Fantasy' },
+    { value: 'documentary', label: 'Documentary' },
+    { value: 'abstract', label: 'Abstract' },
 ];
 
 export const VideoGen: React.FC = () => {
@@ -109,14 +129,10 @@ export const VideoGen: React.FC = () => {
         
         try {
             let finalPrompt = prompt;
-            const styleText = style !== 'none' ? ` in a ${style} style` : '';
-            const durationText = `, ${duration} seconds long`;
-
-            if(finalPrompt) {
-                finalPrompt = `${finalPrompt}${styleText}${durationText}`;
-            } else {
-                // Case for image-only generation
-                finalPrompt = `Animate the provided image${styleText}${durationText}`;
+            if (prompt) {
+                const styleText = style !== 'none' ? ` in a ${style} style` : '';
+                const durationText = `, ${duration} seconds long`;
+                finalPrompt = `${prompt}${styleText}${durationText}`;
             }
             
             const imagePayload = image ? { data: await fileToBase64(image.file), mimeType: image.file.type } : undefined;
@@ -235,21 +251,9 @@ export const VideoGen: React.FC = () => {
                                 onChange={(e) => setStyle(e.target.value)}
                                 className="w-full bg-fission-dark text-fission-text p-2 rounded-md border border-fission-purple focus:ring-2 focus:ring-fission-cyan focus:outline-none"
                             >
-                                <option value="none">Default</option>
-                                <option value="cinematic">Cinematic</option>
-                                <option value="photorealistic">Photorealistic</option>
-                                <option value="anime">Anime</option>
-                                <option value="synthwave">Synthwave</option>
-                                <option value="vaporwave">Vaporwave</option>
-                                <option value="steampunk">Steampunk</option>
-                                <option value="cyberpunk">Cyberpunk</option>
-                                <option value="impressionistic">Impressionistic</option>
-                                <option value="claymation">Claymation</option>
-                                <option value="black and white">Black and White</option>
-                                <option value="futuristic">Futuristic</option>
-                                <option value="fantasy">Fantasy</option>
-                                <option value="documentary">Documentary</option>
-                                <option value="abstract">Abstract</option>
+                                {visualStyles.map(s => (
+                                   <option key={s.value} value={s.value}>{s.label}</option>
+                               ))}
                             </select>
                         </div>
                         <div>
@@ -293,11 +297,10 @@ export const VideoGen: React.FC = () => {
             {error && <div className="mt-4 text-red-400 bg-red-900/50 p-3 rounded-md">{error}</div>}
 
             {loading && (
-                <div className="mt-6 text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-fission-cyan mx-auto"></div>
-                    <p className="mt-4 text-fission-text text-lg">{loadingMessage}</p>
-                    <p className="text-sm text-gray-400 mt-2">Video generation can take a few minutes. Please be patient.</p>
-                </div>
+                <Spinner 
+                    message={loadingMessage} 
+                    subMessage="Video generation can take a few minutes. Please be patient." 
+                />
             )}
             
             {generatedVideo && (

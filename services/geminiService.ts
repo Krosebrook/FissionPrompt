@@ -58,13 +58,16 @@ export const generateVideo = async (prompt: string, aspectRatio: "16:9" | "9:16"
     const ai = getAIClient();
     const requestPayload: any = {
         model: 'veo-3.1-fast-generate-preview',
-        prompt,
         config: {
             numberOfVideos: 1,
             resolution,
             aspectRatio,
         }
     };
+
+    if (prompt) {
+        requestPayload.prompt = prompt;
+    }
 
     if (image) {
         requestPayload.image = {
@@ -191,16 +194,17 @@ export const analyzeVideo = async (prompt: string, video: { data: string, mimeTy
 };
 
 // --- TEXT-TO-SPEECH ---
-export const generateSpeech = async (text: string): Promise<string> => {
+export const generateSpeech = async (text: string, voiceName: string, speakingRate: number): Promise<string> => {
     const ai = getAIClient();
     const response = await ai.models.generateContent({
         model: "gemini-2.5-flash-preview-tts",
-        contents: [{ parts: [{ text: `Say: ${text}` }] }],
+        contents: [{ parts: [{ text }] }],
         config: {
             responseModalities: [Modality.AUDIO],
             speechConfig: {
+                speakingRate,
                 voiceConfig: {
-                    prebuiltVoiceConfig: { voiceName: 'Kore' },
+                    prebuiltVoiceConfig: { voiceName },
                 },
             },
         },

@@ -2,8 +2,10 @@
   <defs>
     <linearGradient id="iconGradient" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#00f6ff" />
-      <stop offset="100%" stop-color="#9733ee" />
+      <stop offset="100%" stop-color="#f04e98" />
     </linearGradient>
   </defs>
-  <path fill="url(#iconGradient)" d="M18.5,6.55L16.37,4.5H7.63L5.5,6.55V11.5H3.5v-1a1,1,0,0,0-2,0v4a1,1,0,0,0,2,0v-1h2v4.5A1.5,1.5,0,0,0,7,20.5h10a1.5,1.5,0,0,0,1.5-1.5V11.5h2v1a1,1,0,0,0,2,0v-4a1,1,0,0,0-2,0v1H18.5Zm-11,11a1,1,0,1,1,1-1A1,1,0,0,1,7.5,17.55Zm9,0a1,1,0,1,1,1-1A1,1,0,0,1,16.5,17.55Z" />
+  <path fill="url(#iconGradient)" d="M12,2A10,10,0,1,0,22,12,10,10,0,0,0,12,2Zm0,18a8,8,0,1,1,8-8A8,8,0,0,1,12,20Z"/>
+  <path fill="url(#iconGradient)" d="M12,6a6,6,0,1,0,6,6A6,6,0,0,0,12,6Zm0,10a4,4,0,1,1,4-4A4,4,0,0,1,12,16Z"/>
+  <path fill="url(#iconGradient)" d="M12,9a3,3,0,1,0,3,3A3,3,0,0,0,12,9Zm0,4a1,1,0,1,1,1-1A1,1,0,0,1,12,13Z"/>
 </svg>

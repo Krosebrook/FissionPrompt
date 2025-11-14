@@ -1,10 +1,32 @@
 
 import React, { useState } from 'react';
 import { generateImage } from '../services/geminiService';
+import { Spinner } from './Spinner';
+
+const promptSuggestions = [
+    "A majestic lion wearing a crown, sitting on a throne in a futuristic city.",
+    "An oil painting of a serene cherry blossom garden at night, with a glowing full moon.",
+    "A synthwave-style illustration of a retro sports car driving into a sunset.",
+    "A cute, fluffy alien creature exploring a vibrant, candy-colored forest.",
+];
+
+const stylePresets = [
+    { name: 'Photorealistic', prompt: ', photorealistic, 8k, hyper-detailed, cinematic lighting' },
+    { name: 'Anime', prompt: ', anime style, vibrant colors, detailed line art, key visual' },
+    { name: 'Cyberpunk', prompt: ', cyberpunk style, neon lights, dystopian future, high-tech low-life' },
+    { name: 'Fantasy Art', prompt: ', fantasy art, epic, detailed, magical, D&D character art' },
+    { name: 'Watercolor', prompt: ', watercolor painting, soft edges, vibrant washes of color' },
+    { name: 'Pixel Art', prompt: ', pixel art, 16-bit, retro gaming aesthetic' },
+    { name: 'Minimalist', prompt: ', minimalist, clean lines, simple, elegant' },
+    { name: '3D Render', prompt: ', 3d render, octane render, trending on artstation, cinematic' },
+    { name: 'Comic Book', prompt: ', comic book style, bold lines, vibrant colors, halftone dots' },
+];
+
 
 export const ImageGen: React.FC = () => {
     const [prompt, setPrompt] = useState('');
     const [aspectRatio, setAspectRatio] = useState('1:1');
+    const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
     const [generatedImage, setGeneratedImage] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -17,8 +39,15 @@ export const ImageGen: React.FC = () => {
         setLoading(true);
         setError(null);
         setGeneratedImage(null);
+        
+        let finalPrompt = prompt;
+        const activeStyle = stylePresets.find(s => s.name === selectedStyle);
+        if (activeStyle) {
+            finalPrompt += activeStyle.prompt;
+        }
+
         try {
-            const imageUrl = await generateImage(prompt, aspectRatio);
+            const imageUrl = await generateImage(finalPrompt, aspectRatio);
             setGeneratedImage(imageUrl);
         } catch (e) {
             setError('Failed to generate image. Please try again.');
@@ -26,6 +55,14 @@ export const ImageGen: React.FC = () => {
         } finally {
             setLoading(false);
         }
+    };
+    
+    const handleSuggestionClick = (suggestion: string) => {
+        setPrompt(suggestion);
+    };
+
+    const handleStyleClick = (styleName: string) => {
+        setSelectedStyle(prevStyle => prevStyle === styleName ? null : styleName);
     };
 
     return (
@@ -39,7 +76,42 @@ export const ImageGen: React.FC = () => {
                     className="w-full p-3 bg-fission-dark text-fission-text rounded-md border border-fission-purple focus:ring-2 focus:ring-fission-cyan focus:outline-none transition"
                     rows={3}
                 />
-                <div className="flex items-center justify-between mt-4">
+                
+                <div className="my-4">
+                    <p className="text-sm text-gray-400 mb-2">Need inspiration? Try one of these:</p>
+                    <div className="flex flex-wrap gap-2">
+                        {promptSuggestions.map((suggestion, index) => (
+                            <button
+                                key={index}
+                                onClick={() => handleSuggestionClick(suggestion)}
+                                className="bg-fission-dark hover:bg-fission-purple text-fission-text text-sm py-1 px-3 rounded-full transition-colors"
+                            >
+                                {suggestion}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="my-4 border-t border-fission-purple pt-4">
+                    <p className="text-sm text-gray-400 mb-2">Add a style:</p>
+                    <div className="flex flex-wrap gap-2">
+                        {stylePresets.map((style) => (
+                            <button
+                                key={style.name}
+                                onClick={() => handleStyleClick(style.name)}
+                                className={`py-2 px-4 rounded-md transition-colors text-sm font-semibold ${
+                                    selectedStyle === style.name 
+                                    ? 'bg-fission-cyan text-fission-dark' 
+                                    : 'bg-fission-dark hover:bg-fission-purple text-fission-text'
+                                }`}
+                            >
+                                {style.name}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="flex items-center justify-between mt-4 border-t border-fission-purple pt-4">
                      <div className="flex items-center">
                         <label htmlFor="aspectRatio" className="mr-2 text-fission-text">Aspect Ratio:</label>
                         <select
@@ -67,12 +139,7 @@ export const ImageGen: React.FC = () => {
 
             {error && <div className="mt-4 text-red-400 bg-red-900/50 p-3 rounded-md">{error}</div>}
 
-            {loading && (
-                <div className="mt-6 text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-fission-cyan mx-auto"></div>
-                    <p className="mt-2 text-fission-text">Generating your image, please wait...</p>
-                </div>
-            )}
+            {loading && <Spinner message="Generating your image, please wait..." />}
 
             {generatedImage && (
                 <div className="mt-6">
